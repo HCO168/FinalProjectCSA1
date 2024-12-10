@@ -1,7 +1,9 @@
+import java.util.ArrayList;
+
 public class Entity {
     public String name;
     public String type;
-    public long uid;
+    private final long uid;
     private static long currentUid=0;
     public Entity(){
         this.name="unnamed";
@@ -12,9 +14,6 @@ public class Entity {
         this.name=name;
         this.type=type;
         this.uid=currentUid++;
-    }
-    public void update(){
-
     }
     public void name(String name){
         this.name=name;
@@ -30,5 +29,24 @@ public class Entity {
     }
     public String toString(){
         return "Entity{name="+name+",type="+type+",uid="+uid+"}";
+    }
+    public void update(){
+
+    }
+
+
+    private static ArrayList<Entity> allEntitiesAL;
+    private static long lastMillisecondTime=System.currentTimeMillis();
+    private static long deltaMilliSeconds=0;
+    public static long getDeltaMilliSeconds(){
+        return deltaMilliSeconds;
+    }
+    public static void updateAll() {
+        long currentMillisecond=System.currentTimeMillis();
+        deltaMilliSeconds=currentMillisecond-lastMillisecondTime;
+        lastMillisecondTime=currentMillisecond;
+        for (Entity entity:allEntitiesAL) {
+            entity.update();
+        }
     }
 }
