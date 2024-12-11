@@ -9,19 +9,22 @@ public class Food extends Item{
         this.healthRecover=healthRecover;
         this.spoilMilliseconds=spoilMilliseconds;
         canSpoil = spoilMilliseconds > 0;
+        if(!canSpoil){
+            stopUpdate();
+        }
     }
     public void spoil(){
+        stopUpdate();
+        Main.output(name+" * "+weight+" unitWeight contain "+energy+" unitEnergy is spoiled.");
         this.name="spoiled food";
         this.energy=0;
         this.healthRecover=-10;
         this.canSpoil=false;
     }
     public void update(){
-        if(canSpoil){
-            spoilMilliseconds-=getDeltaMilliSeconds();
-            if(spoilMilliseconds<=0){
-                spoil();
-            }
+        spoilMilliseconds-=getDeltaMilliSeconds();
+        if(spoilMilliseconds<=0){
+            spoil();
         }
     }
 }
