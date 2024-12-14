@@ -9,8 +9,8 @@ public class Food extends Item{
         this.healthRecover=healthRecover;
         this.spoilMilliseconds=spoilMilliseconds;
         canSpoil = spoilMilliseconds > 0;
-        if(!canSpoil){
-            stopUpdate();
+        if(canSpoil){
+            startUpdate();
         }
     }
     public void spoil(){
@@ -26,5 +26,10 @@ public class Food extends Item{
         if(spoilMilliseconds<=0){
             spoil();
         }
+    }
+    public void remove(){
+        stopUpdate();
+        energy=0;
+        healthRecover=0;
     }
 }

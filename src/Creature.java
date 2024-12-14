@@ -1,44 +1,79 @@
+import java.util.ArrayList;
+
 public class Creature extends Entity{
-    double age;
-    double health;
-    double weight;
-    double attackResistance;
-    double energy;
-    double attackPower;
-    double attackPenetration;
-    public Creature(String name,double age,double health,double weight,double energy,double attackResistance,double attackPower,double attackPenetration){
+    public double age;
+    public double health;
+    public double dryWeight;
+    public double wetWeight=0;
+    public double energy;
+    public double attackResistance;
+    public double energyConsumeRate;
+    public double attackPower;
+    public double attackPenetration;
+    protected ArrayList<Item> inventory=new ArrayList<>();
+    public Creature(String name,double age,double health,double dryWeight,double energy,double attackResistance,double attackPower,double attackPenetration,ArrayList<Item> inventory){
         super(name,"Creature");
+        this.startUpdate();
         this.age=age;
         this.health=health;
-        this.weight=weight;
+        this.dryWeight =dryWeight;
         this.energy=energy;
         this.attackResistance=attackResistance;
         this.attackPower=attackPower;
         this.attackPenetration=attackPenetration;
     }
-    public Creature(String name,double age,double health,double weight,double energy){
+    public Creature(String name,double age,double health,double dryWeight,double energy){
         super(name,"Creature");
+        this.startUpdate();
         this.age=age;
         this.health=health;
-        this.weight=weight;
+        this.dryWeight =dryWeight;
         this.energy=energy;
+        this.attackResistance=0;
+        this.attackPower=10;
+        this.attackPenetration=0;
     }
-    void beAttacked(Creature creature){
-
+    public void beAttacked(Creature creature){
+        this.health-=calculateDamage(creature.attackPower,creature.attackResistance,creature.attackPenetration);
     }
-    void attack(Creature creature){
-
+    public void attack(Creature creature){
+        creature.beAttacked(this);
     }
-    void eat(Food food){
-
+    public void eat(Food food){
+        energy+=food.energy;
+        health+=food.healthRecover;
+        wetWeight+=food.weight;
+        food.remove();
     }
-    void die(){
-
+    public Item[] die(){
+        inventory.add(new Item("corpse",1,dryWeight));
+        inventory.add(new Item("excretion",1,wetWeight));
+        this.stopUpdate();
+        Item[] result=inventory.toArray(new Item[0]);
+        inventory.clear();
+        return result;
     }
-    Item[] drop(){
-        return null;
+    public Item[] drop(){
+        Item[] result=inventory.toArray(new Item[0]);
+        inventory.clear();
+        return result;
     }
-    Item excrete(){
-        return null;
+    public Item excrete(){
+        Item item=new Item("excretion",1,wetWeight);
+        wetWeight=0;
+        return item;
+    }
+    public static double energyConsumePerMS=0.01;
+    public void update(){
+        energy-=energyConsumeRate*Entity.getDeltaMilliSeconds();
+        if(energy<=0){
+            this.die();
+        }
+    }
+    private static final double C_zeroBehavior=100;
+    private static final double C_resistanceFacter=1;
+    public static double calculateDamage(double attackPower,double attackResistance,double attackPenetration){
+        return attackPower*(attackPenetration+C_zeroBehavior/
+                (attackPenetration+C_zeroBehavior+C_resistanceFacter*attackResistance));//restrictive decrease when attackResistence increase.
     }
 }
