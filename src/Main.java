@@ -12,7 +12,7 @@ public class Main {
         updater.start();
         Food hamburger=new Food("hamburger",1,0.1,1000,10,50000);
         Food fries=new Food("fries",1,0.1,2000,10,100000);
-        Player player=new Player("Man","Ke","",Gender.Male,15,100,74,100);
+        Player player=new Player("Hua","Li","",Gender.Male,15,100,74,100);
         player.attackPower=100;//with gun
         player.attackPenetration=100;
         player.attackResistance=10;
@@ -24,7 +24,10 @@ public class Main {
         player.attack(bear);
         player.eat(hamburger);
         player.eat(fries);
-
+        NPC npc=new NPC("John","Smith","",Gender.Female,50,1000,60,0);
+        npc.addQuestionPair("How are you","I'm good");
+        npc.defaultAnswer="what are you talking about?";
+        output(npc.answer("how are you"));
     }
     public static void output(String str){
         System.out.println(str+"  -"+mainWorld.getRuntime()+" ms");
