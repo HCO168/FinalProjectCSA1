@@ -22,7 +22,7 @@ public class Food extends Item{
         this.canSpoil=false;
     }
     public void update(){
-        spoilMilliseconds-=getDeltaMilliSeconds();
+        spoilMilliseconds-=world().getDeltaMilliSeconds();
         if(spoilMilliseconds<=0){
             spoil();
         }

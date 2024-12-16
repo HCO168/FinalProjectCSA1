@@ -21,6 +21,12 @@ public class Creature extends Entity{
         this.attackResistance=attackResistance;
         this.attackPower=attackPower;
         this.attackPenetration=attackPenetration;
+        if(energy==0){
+            this.energyConsumeRate=0;
+        }
+        if(inventory!=null){
+            this.inventory.addAll(inventory);
+        }
     }
     public Creature(String name,double age,double health,double dryWeight,double energy){
         super(name,"Creature");
@@ -32,9 +38,23 @@ public class Creature extends Entity{
         this.attackResistance=0;
         this.attackPower=10;
         this.attackPenetration=0;
+        if(energy==0){
+            this.energyConsumeRate=0;
+        }else{
+            this.energyConsumeRate=0.001;
+        }
     }
     public void beAttacked(Creature creature){
-        this.health-=calculateDamage(creature.attackPower,creature.attackResistance,creature.attackPenetration);
+        double damage=calculateDamage(creature.attackPower,creature.attackResistance,creature.attackPenetration);
+        health-=damage;
+        if(health<=0){
+            health=0;
+        }
+        Main.output(creature.name()+" hurt "+this.name()+" "+damage+"*hp, now have "+this.health+" hp");
+        if(this.health<=0){
+            Main.output(creature.name()+" killed "+this.name());
+            this.die();
+        }
     }
     public void attack(Creature creature){
         creature.beAttacked(this);
@@ -43,6 +63,7 @@ public class Creature extends Entity{
         energy+=food.energy;
         health+=food.healthRecover;
         wetWeight+=food.weight;
+        Main.output(name+" eat some "+food.name+", gain "+food.energy+" uE, now have "+energy+" uE, gain "+food.healthRecover+" hp, now have "+health+" hp");
         food.remove();
     }
     public Item[] die(){
@@ -65,15 +86,15 @@ public class Creature extends Entity{
     }
     public static double energyConsumePerMS=0.01;
     public void update(){
-        energy-=energyConsumeRate*Entity.getDeltaMilliSeconds();
-        if(energy<=0){
+        energy-=energyConsumeRate*world().getDeltaMilliSeconds();
+        if(energy<0){
             this.die();
         }
     }
-    private static final double C_zeroBehavior=100;
+    private static final double C_zeroBehavior=1;
     private static final double C_resistanceFacter=1;
     public static double calculateDamage(double attackPower,double attackResistance,double attackPenetration){
-        return attackPower*(attackPenetration+C_zeroBehavior/
-                (attackPenetration+C_zeroBehavior+C_resistanceFacter*attackResistance));//restrictive decrease when attackResistence increase.
+        return attackPower*(attackPenetration+C_zeroBehavior)/
+                (attackPenetration+C_zeroBehavior+C_resistanceFacter*attackResistance);//restrictive decrease when attackResistence increase.
     }
 }

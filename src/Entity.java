@@ -8,8 +8,13 @@ public class Entity {
     public String type;
     private long uid;
     private boolean isUpdating=false;
+    private World world;
+    public static World defaultWorld=null;
     private void register(){
         this.uid=currentUid++;
+        if(defaultWorld!=null){
+            this.setWorld(defaultWorld);
+        }
     }
     public Entity(){
         this.name="unnamed";
@@ -39,73 +44,26 @@ public class Entity {
     public void update(){
 
     }
-    protected final void stopUpdate(){
-        if(isUpdating){
-            isUpdating=false;
-            entitiesToBeRemovedList.add(this);
+    public final void setWorld(World newWorld){
+        if(this.world!=null){
+            world.removeEntity(this);
         }
+        world=newWorld;
+        world.addEntity(this);
+    }
+    public final World world(){
+        return world;
+    }
+    protected final void stopUpdate(){
+        isUpdating=false;
     }
     protected final void startUpdate(){
-        if(!isUpdating){
-            isUpdating=true;
-            entitiesToBeAddedList.add(this);
-        }
+        isUpdating=true;
     }
-    private static final ArrayList<Entity> allEntitiesAL=new ArrayList<>();
-    private static final List<Entity> entitiesToBeAddedList= Collections.synchronizedList(new ArrayList<>());//get outside help
-    private static final List<Entity> entitiesToBeRemovedList= Collections.synchronizedList(new ArrayList<>());
-    private static long firstMillisecondTime=System.currentTimeMillis();
-    private static long lastMillisecondTime=firstMillisecondTime;
-    private static long deltaMilliSeconds=0;
-    public static long getDeltaMilliSeconds(){
-        return deltaMilliSeconds;
+    public final boolean isUpdating(){
+        return isUpdating;
     }
-    public static void updateAll() {
-        long currentMillisecond=System.currentTimeMillis();
-        deltaMilliSeconds=currentMillisecond-lastMillisecondTime;
-        lastMillisecondTime=currentMillisecond;
-        allEntitiesAL.addAll(entitiesToBeAddedList);
-        entitiesToBeAddedList.clear();
-        for(Entity entity:entitiesToBeRemovedList){
-            allEntitiesAL.remove(entity);
-        }
-        entitiesToBeRemovedList.clear();
-        for (Entity entity:allEntitiesAL) {
-            entity.update();
-        }
-    }
-    private static boolean isUpdatingAll=false;
-    public static void updateAllRepetitively(int deltaMilliSecondsTime, int n_Execute){
-        isUpdatingAll=true;
-        lastMillisecondTime=System.currentTimeMillis();
-        try {
-            Thread.sleep(deltaMilliSecondsTime);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        Thread lastThread=new Thread(Entity::updateAll);
-        for(int i=0;i<n_Execute;i++){
-            try {
-                Thread.sleep(deltaMilliSecondsTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            if(lastThread.isAlive()){
-                continue;
-            }
-            if(!isUpdatingAll){
-                Main.output("Stop updating manually: "+deltaMilliSecondsTime+" ms * "+i+" times has executed, plan to execute "+n_Execute+" times in total.");
-                return;
-            }
-            lastThread=new Thread(Entity::updateAll);
-            lastThread.start();
-        }
-        Main.output("Stop updating: "+deltaMilliSecondsTime+" ms * "+n_Execute+" complete executed.");
-    }
-    public static void stopUpdatingAll(){
-        isUpdatingAll=false;
-    }
-    public static long getRuntime(){
-        return System.currentTimeMillis()-firstMillisecondTime;
+    public String describe(){
+        return toString();
     }
 }
